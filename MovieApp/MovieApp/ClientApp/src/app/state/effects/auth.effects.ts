@@ -11,6 +11,9 @@ import {
   loginSuccess,
   logout,
   setAuthState,
+  register,
+  registerSuccess,
+  registerFailure,
 } from '../actions/auth.actions';
 import { selectQueryParams } from '../selectors/router.selectors';
 
@@ -21,6 +24,7 @@ export class AuthEffects {
   private readonly router = inject(Router);
   private readonly store = inject(Store);
 
+  // 🔹 Login Effect
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(login),
@@ -43,6 +47,7 @@ export class AuthEffects {
     )
   );
 
+  // 🔹 Logout Effect
   logout$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -55,6 +60,7 @@ export class AuthEffects {
     { dispatch: false }
   );
 
+  // 🔹 Handle login success
   handleLoginSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loginSuccess),
@@ -77,6 +83,24 @@ export class AuthEffects {
           return loginFailure({ errorMessage: 'Invalid token' });
         }
       })
+    )
+  );
+
+  // 🔹 Registration Effect
+  register$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(register),
+      switchMap(({ userdetails }) =>
+        this.authenticationService.register(userdetails).pipe(
+          map(() => {
+            this.router.navigate(['/login']); // 👈 redirect to login after successful registration
+            return registerSuccess();
+          }),
+          catchError((error) =>
+            of(registerFailure({ errorMessage: error.message }))
+          )
+        )
+      )
     )
   );
 }

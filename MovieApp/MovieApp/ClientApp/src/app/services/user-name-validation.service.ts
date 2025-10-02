@@ -38,7 +38,7 @@ export class UserNameValidationService {
           }
           return this.userService.validateUserName(value).pipe(
             map((isUserNameAvailable) =>
-              isUserNameAvailable ? null : { userNameNotAvailable: true }
+              isUserNameAvailable ? null : { usernameNotAvailable: true }
             ),
             catchError(() => of(null))
           );

@@ -50,14 +50,14 @@
           <input
             matInput
             placeholder="User Name"
-            formControlName="userName"
+            formControlName="username"
             required
           />
-          @if ( registrationFormControl.userName.touched &&
-          registrationFormControl.userName.errors?.['required'] ) {
+          @if ( registrationFormControl.username.touched &&
+          registrationFormControl.username.errors?.['required'] ) {
           <mat-error>User Name is required </mat-error>
-          } @if ( registrationFormControl.userName.touched &&
-          registrationFormControl.userName.errors?.['userNameNotAvailable'] ) {
+          } @if ( registrationFormControl.username.touched &&
+          registrationFormControl.username.errors?.['usernameNotAvailable'] ) {
           <mat-error>User Name is not available</mat-error>
           }
         </mat-form-field>

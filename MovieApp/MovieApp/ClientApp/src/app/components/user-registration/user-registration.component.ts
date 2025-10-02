@@ -70,7 +70,7 @@ export class UserRegistrationComponent {
       {
         firstName: this.formBuilder.control('', Validators.required),
         lastName: this.formBuilder.control('', Validators.required),
-        userName: this.formBuilder.control('', {
+        username: this.formBuilder.control('', {
           asyncValidators: [
             this.userNameValidationService.usernameAvailabilityValidator(),
           ],
@@ -93,15 +93,24 @@ export class UserRegistrationComponent {
       }
     );
 
-  protected registerUser(): void {
-    if (this.userRegistrationForm.valid) {
-      this.store.dispatch(
-        register({
-          userdetails: this.userRegistrationForm.value as UserRegistration,
-        })
-      );
-    }
+protected registerUser(): void {
+  if (this.userRegistrationForm.valid) {
+    const payload: UserRegistration = {
+      firstName: this.userRegistrationForm.value.firstName!,
+      lastName: this.userRegistrationForm.value.lastName!,
+      username: this.userRegistrationForm.value.username!, //macthes
+      password: this.userRegistrationForm.value.password!,
+      gender: this.userRegistrationForm.value.gender!,
+      userTypeName: 'User' // default role
+    };
+
+    this.store.dispatch(
+      register({
+        userdetails: payload,
+      })
+    );
   }
+}
 
   protected get registrationFormControl() {
     return this.userRegistrationForm.controls;
