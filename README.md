@@ -37,12 +37,11 @@ https://github.com/AnkitSharma-007/MovieApp/assets/33789321/4e315707-3544-4d6a-9
 # Steps to run the app
 
 1. Clone the Repo
-2. Scaffold the database using the [DBScript](https://github.com/AnkitSharma-007/MovieApp/tree/main/DBScript)
-3. Put your own connection string in [appsettings.json](https://github.com/AnkitSharma-007/MovieApp/blob/main/MovieApp/MovieApp/appsettings.json) file.
+2. Scaffold the database using the DBScript.
+3. Put your own connection string in appsettings.json file.
 4. Build and launch the application from Visual Studio.
 
-# Live Demo
-[https://movieapp-angular.azurewebsites.net/](https://movieapp-angular.azurewebsites.net/)
+
 
 # Licenese
 
@@ -50,8 +49,4 @@ https://github.com/AnkitSharma-007/MovieApp/assets/33789321/4e315707-3544-4d6a-9
 
 # See Also
 
-- https://github.com/AnkitSharma-007/BookCart
-- https://github.com/AnkitSharma-007/blogging-app-with-Angular-CloudFirestore
-- https://github.com/AnkitSharma-007/angular-graphql
-- https://github.com/AnkitSharma-007/angular-forms-validation
-- https://github.com/AnkitSharma-007/Smart-Angular-App-Using-Azure-Cognitive-Services
+
