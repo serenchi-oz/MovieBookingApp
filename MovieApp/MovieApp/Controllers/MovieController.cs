@@ -12,134 +12,152 @@ namespace MovieApp.Controllers
     [ApiController]
     public class MovieController : ControllerBase
     {
-        readonly IWebHostEnvironment _hostingEnvironment;
-        readonly IMovie _movieService;
-        readonly IConfiguration _config;
-        readonly string posterFolderPath = string.Empty;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly IMovie _movieService;
+        private readonly IConfiguration _config;
+        private readonly string _posterFolderPath;
 
         public MovieController(IConfiguration config, IWebHostEnvironment hostingEnvironment, IMovie movieService)
         {
             _config = config;
             _movieService = movieService;
             _hostingEnvironment = hostingEnvironment;
-            posterFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "Poster");
+            _posterFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "Poster");
         }
+
+        #region GET Endpoints
 
         [HttpGet]
-        public async Task<List<Movie>> Get()
+        [ProducesResponseType(typeof(List<Movie>), 200)]
+        public async Task<ActionResult<List<Movie>>> Get(CancellationToken cancellationToken)
         {
-            return await _movieService.GetAllMovies();
+            var movies = await _movieService.GetAllMovies();
+            return Ok(movies);
         }
 
-        [HttpGet]
-        [Route("GetGenreList")]
-        public async Task<IEnumerable<Genre>> GenreList()
+        [HttpGet("GetGenreList")]
+        [ProducesResponseType(typeof(IEnumerable<Genre>), 200)]
+        public async Task<ActionResult<IEnumerable<Genre>>> GenreList(CancellationToken cancellationToken)
         {
-            return await _movieService.GetGenre();
+            var genres = await _movieService.GetGenre();
+            return Ok(genres);
         }
 
-        [HttpGet]
-        [Route("GetSimilarMovies/{movieId}")]
-        public async Task<List<Movie>> SimilarMovies(int movieId)
+        [HttpGet("GetSimilarMovies/{movieId}")]
+        [ProducesResponseType(typeof(List<Movie>), 200)]
+        public async Task<ActionResult<List<Movie>>> SimilarMovies(int movieId, CancellationToken cancellationToken)
         {
-            return await _movieService.GetSimilarMovies(movieId);
+            var similarMovies = await _movieService.GetSimilarMovies(movieId);
+            return Ok(similarMovies);
         }
 
-        /// <summary>
-        /// Add a new movie record
-        /// </summary>
-        /// <returns></returns>
+        #endregion
+
+        #region POST Endpoint
+
         [HttpPost, DisableRequestSizeLimit]
         [Authorize(Policy = UserRoles.Admin)]
-        public async Task<IActionResult> Post()
+        [ProducesResponseType(typeof(Movie), 200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> Post(CancellationToken cancellationToken)
         {
-            Movie? movie = JsonConvert.DeserializeObject<Movie>(Request.Form["movieFormData"].ToString());
+            var movieFormData = Request.Form["movieFormData"].ToString();
+            if (string.IsNullOrWhiteSpace(movieFormData))
+                return BadRequest("Movie data is required.");
 
-            if (movie is not null)
-            {
+            var movie = JsonConvert.DeserializeObject<Movie>(movieFormData);
+            if (movie == null)
+                return BadRequest("Invalid movie data.");
 
-                if (Request.Form.Files.Count > 0)
-                {
-                    var file = Request.Form.Files[0];
+            movie.PosterPath = await HandleFileUploadAsync(Request.Form.Files);
 
-                    if (file.Length > 0)
-                    {
-                        string fileName = $"{Guid.NewGuid()}{ContentDispositionHeaderValue.Parse(file.ContentDisposition)?.FileName?.Trim('"')}";
-                        string fullPath = Path.Combine(posterFolderPath, fileName);
-                        using (var stream = new FileStream(fullPath, FileMode.Create))
-                        {
-                            file.CopyTo(stream);
-                        }
-                        movie.PosterPath = fileName;
-                    }
-                }
-                else
-                {
-                    movie.PosterPath = _config["DefaultPoster"];
-
-                }
-
-                await _movieService.AddMovie(movie);
-                return Ok(movie);
-            }
-            else
-            {
-                return BadRequest();
-            }
+            await _movieService.AddMovie(movie);
+            return Ok(movie);
         }
+
+        #endregion
+
+        #region PUT Endpoint
 
         [HttpPut]
         [Authorize(Policy = UserRoles.Admin)]
-        public async Task<IActionResult> Put()
+        [ProducesResponseType(typeof(Movie), 200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> Put(CancellationToken cancellationToken)
         {
-            Movie? movie = JsonConvert.DeserializeObject<Movie>(Request.Form["movieFormData"].ToString());
+            var movieFormData = Request.Form["movieFormData"].ToString();
+            if (string.IsNullOrWhiteSpace(movieFormData))
+                return BadRequest("Movie data is required.");
 
-            if (movie is not null)
-            {
-                if (Request.Form.Files.Count > 0)
-                {
-                    var file = Request.Form.Files[0];
+            var movie = JsonConvert.DeserializeObject<Movie>(movieFormData);
+            if (movie == null)
+                return BadRequest("Invalid movie data.");
 
-                    if (file.Length > 0)
-                    {
-                        string fileName = $"{Guid.NewGuid()}{ContentDispositionHeaderValue.Parse(file.ContentDisposition)?.FileName?.Trim('"')}";
-                        string fullPath = Path.Combine(posterFolderPath, fileName);
-                        bool isFileExists = Directory.Exists(fullPath);
+            var uploadedFile = await HandleFileUploadAsync(Request.Form.Files);
+            if (!string.IsNullOrEmpty(uploadedFile))
+                movie.PosterPath = uploadedFile;
 
-                        if (!isFileExists)
-                        {
-                            using (var stream = new FileStream(fullPath, FileMode.Create))
-                            {
-                                file.CopyTo(stream);
-                            }
-                            movie.PosterPath = fileName;
-                        }
-                    }
-                }
-                await _movieService.UpdateMovie(movie);
-                return Ok(movie);
-            }
-            else
-            {
-                return BadRequest();
-            }
+            await _movieService.UpdateMovie(movie);
+            return Ok(movie);
         }
+
+        #endregion
+
+        #region DELETE Endpoint
 
         [HttpDelete("{movieId}")]
         [Authorize(Policy = UserRoles.Admin)]
-        public async Task<IActionResult> Delete(int movieId)
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> Delete(int movieId, CancellationToken cancellationToken)
         {
-            string coverFileName = await _movieService.DeleteMovie(movieId);
+            var coverFileName = await _movieService.DeleteMovie(movieId);
 
             if (!string.IsNullOrEmpty(coverFileName) && coverFileName != _config["DefaultPoster"])
             {
-                string fullPath = Path.Combine(posterFolderPath, coverFileName);
+                var fullPath = Path.Combine(_posterFolderPath, coverFileName);
                 if (System.IO.File.Exists(fullPath))
                 {
-                    System.IO.File.Delete(fullPath);
+                    try
+                    {
+                        System.IO.File.Delete(fullPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Optional: log the exception
+                    }
                 }
             }
-            return Ok();
+
+            return Ok(new { Message = "Movie deleted successfully." });
         }
+
+        #endregion
+
+        #region Private Helpers
+
+        private async Task<string> HandleFileUploadAsync(IFormFileCollection files)
+        {
+            if (files.Count == 0) return _config["DefaultPoster"];
+
+            var file = files[0];
+            if (file.Length == 0) return _config["DefaultPoster"];
+
+            string extension = Path.GetExtension(file.FileName);
+            string fileName = $"{Guid.NewGuid()}{extension}";
+            string fullPath = Path.Combine(_posterFolderPath, fileName);
+
+            // Ensure folder exists
+            if (!Directory.Exists(_posterFolderPath))
+                Directory.CreateDirectory(_posterFolderPath);
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return fileName;
+        }
+
+        #endregion
     }
 }
