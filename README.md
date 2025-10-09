@@ -50,3 +50,27 @@ https://github.com/AnkitSharma-007/MovieApp/assets/33789321/4e315707-3544-4d6a-9
 # See Also
 
 
+## 🌐 Deployment Options
+
+### 1. Render (Full-Stack Deployment)
+
+Render supports both backend (.NET) and frontend (Angular) hosting.
+
+**Steps:**
+
+1. Create a new **Web Service** for your ASP.NET Core API on Render.
+2. Connect your GitHub repository and set environment variables (`ConnectionStrings`, JWT keys, etc.).
+3. Set the **build command** for .NET:
+   ```bash
+   dotnet publish -c Release -o publish
+
+   Vercel (Frontend Deployment)
+
+Vercel is ideal for deploying the Angular frontend only.
+
+Steps:
+
+Push your Angular project (MovieApp.Client) to GitHub. Login to Vercel and import the repository. Set the framework preset to Angular. Configure the build command:
+
+```bash
+ng build --prod
