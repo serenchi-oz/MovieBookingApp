@@ -20,7 +20,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "An ASP.NET Core Web API for managing the movie data",
         Contact = new OpenApiContact
         {
-            Name = "Ankit Sharma",
+            Name = "Manmohan Sajwan",
             Url = new Uri("https://ankitsharmablogs.com/"),
         },
         License = new OpenApiLicense
