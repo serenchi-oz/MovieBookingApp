@@ -21,12 +21,12 @@ builder.Services.AddSwaggerGen(options =>
         Contact = new OpenApiContact
         {
             Name = "Ankit Sharma",
-            Url = new Uri("https://ankitsharmablogs.com/"),
+            Url = new Uri(""),
         },
         License = new OpenApiLicense
         {
             Name = "MIT Licenese",
-            Url = new Uri("https://github.com/AnkitSharma-007/MovieApp/blob/main/LICENSE"),
+            Url = new Uri(""),
         }
     });
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
