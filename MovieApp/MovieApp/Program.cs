@@ -20,8 +20,13 @@ builder.Services.AddSwaggerGen(options =>
         Description = "An ASP.NET Core Web API for managing the movie data",
         Contact = new OpenApiContact
         {
+ edit-infile
             Name = "Ankit Sharma",
             Url = new Uri(""),
+
+            Name = "Manmohan Sajwan",
+            Url = new Uri(""),
+ main
         },
         License = new OpenApiLicense
         {
